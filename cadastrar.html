@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastrar - Chat Real</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(120deg, #1f2a38, #0c1a2a);
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+    }
+
+    .container {
+      background-color: #121d2c;
+      border-radius: 10px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .container h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .input-field {
+      margin-bottom: 15px;
+    }
+
+    .input-field input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #1f2a38;
+      background-color: #1c2c3e;
+      color: white;
+      font-size: 14px;
+    }
+
+    .input-field input:focus {
+      outline: none;
+      border-color: #0072ff;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 10px;
+      background-color: #0072ff;
+      border-radius: 8px;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #005cd8;
+    }
+
+    .error-message {
+      color: #ff4d4d;
+      font-size: 14px;
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Cadastrar Conta</h2>
+    <div class="input-field">
+      <input type="text" id="username" placeholder="Username" required>
+    </div>
+    <div class="input-field">
+      <input type="password" id="password" placeholder="Senha" required>
+    </div>
+    <button class="btn" onclick="register()">Cadastrar</button>
+    <div class="error-message" id="error-message"></div>
+    <p style="text-align: center; margin-top: 10px; color: white;">Já tem conta? <a href="index.html" style="color: #0072ff;">Faça login aqui</a></p>
+  </div>
+
+  <script>
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+
+    function register() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const errorMessage = document.getElementById("error-message");
+
+      // Validação de campo
+      if (!username || !password) {
+        errorMessage.textContent = "Todos os campos são obrigatórios!";
+        return;
+      }
+
+      // Verificar se o username já existe
+      if (users[username]) {
+        errorMessage.textContent = "Este username já está em uso!";
+        return;
+      }
+
+      // Salvar no banco de dados (localStorage)
+      users[username] = { password };
+      localStorage.setItem("users", JSON.stringify(users));
+
+      // Redirecionar para login
+      alert("Cadastro realizado com sucesso! Faça login.");
+      location.href = "index.html";
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Moderno</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(120deg, #1f2a38, #0c1a2a);
+      height: 100vh;
+      display: flex;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .sidebar, .members {
+      width: 20%;
+      background-color: #0d1622;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-right: 1px solid #1f2a38;
+      overflow-y: auto;
+    }
+
+    .sidebar {
+      animation: slideInLeft 0.6s ease;
+    }
+
+    .members {
+      border-left: 1px solid #1f2a38;
+      animation: slideInRight 0.6s ease;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #121d2c;
+      animation: fadeIn 1s ease;
+    }
+
+    .header {
+      padding: 1rem;
+      background-color: #0c1a2a;
+      border-bottom: 1px solid #1f2a38;
+      font-size: 1.2rem;
+    }
+
+    .messages {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    .messages div {
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: #1c2c3e;
+      border-radius: 8px;
+      max-width: 70%;
+      animation: slideUp 0.3s ease;
+    }
+
+    .input-area {
+      display: flex;
+      padding: 1rem;
+      background-color: #0c1a2a;
+      border-top: 1px solid #1f2a38;
+    }
+
+    .input-area input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      margin-right: 10px;
+      font-size: 14px;
+    }
+
+    .input-area button {
+      padding: 10px 16px;
+      border: none;
+      background-color: #0072ff;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .input-area button:hover {
+      background-color: #005cd8;
+    }
+
+    .group, .member {
+      padding: 8px;
+      background-color: #1c2c3e;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .group:hover, .member:hover {
+      background-color: #2e4057;
+    }
+
+    @keyframes slideInLeft {
+      from { transform: translateX(-100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Grupos -->
+  <div class="sidebar" id="groupList">
+    <strong>Grupos</strong>
+    <div class="group" onclick="selectGroup('Geral')">Geral</div>
+    <div class="group" onclick="selectGroup('Estudos')">Estudos</div>
+    <div class="group" onclick="selectGroup('Jogos')">Jogos</div>
+  </div>
+
+  <!-- Mensagens -->
+  <div class="main">
+    <div class="header" id="groupTitle">Geral</div>
+    <div class="messages" id="messages"></div>
+    <div class="input-area">
+      <input type="text" id="msgInput" placeholder="Digite sua mensagem...">
+      <button onclick="sendMessage()">Enviar</button>
+    </div>
+  </div>
+
+  <!-- Participantes -->
+  <div class="members" id="memberList">
+    <strong>Participantes</strong>
+    <div class="member">Você</div>
+    <div class="member">Manu</div>
+    <div class="member">Ricardo</div>
+  </div>
+
+  <script>
+    const messages = {
+      "Geral": [],
+      "Estudos": [],
+      "Jogos": []
+    };
+
+    let currentGroup = "Geral";
+
+    function selectGroup(group) {
+      currentGroup = group;
+      document.getElementById('groupTitle').textContent = group;
+      renderMessages();
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('msgInput');
+      const text = input.value.trim();
+      if (text === '') return;
+      messages[currentGroup].push(`Você: ${text}`);
+      input.value = '';
+      renderMessages();
+    }
+
+    function renderMessages() {
+      const area = document.getElementById('messages');
+      area.innerHTML = '';
+      messages[currentGroup].forEach(msg => {
+        const div = document.createElement('div');
+        div.textContent = msg;
+        area.appendChild(div);
+      });
+      area.scrollTop = area.scrollHeight;
+    }
+
+    // Exemplo de recebimento simulado (como se outros membros estivessem mandando)
+    setInterval(() => {
+      if (Math.random() < 0.2) {
+        const fake = ["Manu", "Ricardo"][Math.floor(Math.random() * 2)];
+        const textos = ["Olá!", "Tudo bem?", "Vamos estudar?", "Alguém online?", "Bora jogar?"];
+        messages[currentGroup].push(`${fake}: ${textos[Math.floor(Math.random() * textos.length)]}`);
+        renderMessages();
+      }
+    }, 5000);
+
+    renderMessages();
+  </script>
+
+</body>
+</html>

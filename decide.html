@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Real</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      display: flex;
+      background: linear-gradient(120deg, #1f2a38, #0c1a2a);
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar, .members {
+      width: 20%;
+      background-color: #0d1622;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #121d2c;
+    }
+
+    .header {
+      padding: 1rem;
+      background-color: #0c1a2a;
+      border-bottom: 1px solid #1f2a38;
+      font-size: 1.2rem;
+    }
+
+    .messages {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    .messages div {
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: #1c2c3e;
+      border-radius: 8px;
+      max-width: 70%;
+    }
+
+    .input-area {
+      display: flex;
+      padding: 1rem;
+      background-color: #0c1a2a;
+      border-top: 1px solid #1f2a38;
+    }
+
+    .input-area input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      margin-right: 10px;
+      font-size: 14px;
+    }
+
+    .input-area button {
+      padding: 10px 16px;
+      border: none;
+      background-color: #0072ff;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .contact, .info, .group {
+      padding: 8px;
+      background-color: #1c2c3e;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .contact:hover, .group:hover {
+      background-color: #2e4057;
+    }
+
+    #addContactBtn, #createGroupBtn {
+      margin-top: 10px;
+      padding: 8px;
+      border: none;
+      background-color: #0072ff;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+    }
+
+    #addContactBtn:hover, #createGroupBtn:hover {
+      background-color: #005cd8;
+    }
+
+    #groupInput {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Contatos reais -->
+  <div class="sidebar">
+    <strong>Contatos</strong>
+    <div id="contactList"></div>
+    <input type="text" id="newContact" placeholder="Username do contato">
+    <button id="addContactBtn" onclick="addContact()">Adicionar Contato</button>
+
+    <strong>Grupos</strong>
+    <div id="groupList"></div>
+    <input type="text" id="newGroup" placeholder="Nome do grupo">
+    <button id="createGroupBtn" onclick="createGroup()">Criar Grupo</button>
+
+    <input type="text" id="groupToJoin" placeholder="Nome do grupo para entrar">
+    <button id="joinGroupBtn" onclick="joinGroup()">Entrar no Grupo</button>
+  </div>
+
+  <!-- Chat principal -->
+  <div class="main">
+    <div class="header" id="chatTitle">Selecione um contato ou grupo</div>
+    <div class="messages" id="messages"></div>
+    <div class="input-area">
+      <input type="text" id="msgInput" placeholder="Digite sua mensagem...">
+      <button onclick="sendMessage()">Enviar</button>
+    </div>
+  </div>
+
+  <!-- Info dos usuários -->
+  <div class="members">
+    <strong>Participantes</strong>
+    <div class="info" id="currentUserInfo">Você: ...</div>
+    <div class="info" id="targetUserInfo">Com: ...</div>
+  </div>
+
+  <script>
+    const currentUser = localStorage.getItem("currentUser");
+if (!currentUser) location.href = "index.html";  // Redireciona se não houver login
+
+const users = JSON.parse(localStorage.getItem("users") || "{}");
+const contacts = JSON.parse(localStorage.getItem("contacts_" + currentUser) || "[]");
+
+let currentChatWith = null;
+
+document.getElementById("currentUserInfo").textContent = "Você: " + currentUser;
+
+// Adicionar contato
+function addContact() {
+  const newUser = document.getElementById("newContact").value.trim();
+  if (!newUser || newUser === currentUser) {
+    alert("Preencha este campo com um username válido!");
+    return;
+  }
+  if (!users[newUser]) {
+    alert("Usuário não encontrado!");
+    return;
+  }
+  if (!contacts.includes(newUser)) {
+    contacts.push(newUser);
+    localStorage.setItem("contacts_" + currentUser, JSON.stringify(contacts));
+    loadContacts();
+  }
+  document.getElementById("newContact").value = "";
+}
+
+// Carregar contatos
+function loadContacts() {
+  const list = document.getElementById("contactList");
+  list.innerHTML = "";
+  contacts.forEach(contact => {
+    const div = document.createElement("div");
+    div.className = "contact";
+    div.textContent = contact;
+    div.onclick = () => openChatWith(contact);
+    list.appendChild(div);
+  });
+}
+
+// Abrir chat com contato ou grupo
+function openChatWith(contact) {
+  currentChatWith = contact;
+  document.getElementById("chatTitle").textContent = "Chat com " + contact;
+  document.getElementById("targetUserInfo").textContent = "Com: " + contact;
+
+  // Se for grupo, mostrar membros
+  if (contact.startsWith("grupo") || contact.startsWith("Grupo") || contact.startsWith("G")) {
+    const groupData = JSON.parse(localStorage.getItem("group_" + contact));
+    if (groupData) {
+      document.getElementById("targetUserInfo").textContent = "Membros: " + groupData.members.join(", ");
+    }
+  }
+
+  renderMessages();
+}
+
+// Renderizar mensagens
+function renderMessages() {
+  const chatKey = getChatKey(currentUser, currentChatWith);
+  const chat = JSON.parse(localStorage.getItem(chatKey) || "[]");
+  const area = document.getElementById("messages");
+  area.innerHTML = "";
+  chat.forEach(msg => {
+    const div = document.createElement("div");
+    div.textContent = msg.sender + ": " + msg.text;
+    area.appendChild(div);
+  });
+  area.scrollTop = area.scrollHeight;
+}
+
+// Enviar mensagem
+function sendMessage() {
+  const input = document.getElementById("msgInput");
+  const text = input.value.trim();
+  if (!text || !currentChatWith) return;
+
+  const chatKey = getChatKey(currentUser, currentChatWith);
+  const chat = JSON.parse(localStorage.getItem(chatKey) || "[]");
+  chat.push({ sender: currentUser, text });
+  localStorage.setItem(chatKey, JSON.stringify(chat));
+  input.value = "";
+  renderMessages();
+}
+
+// Criar grupo
+function createGroup() {
+  const groupName = document.getElementById("newGroup").value.trim();
+  if (!groupName || groupName.length < 3) {
+    alert("Preencha o campo com o nome do grupo.");
+    return;
+  }
+
+  const allGroups = JSON.parse(localStorage.getItem("all_groups") || "[]");
+  if (allGroups.includes(groupName)) {
+    alert("Grupo já existe!");
+    return;
+  }
+
+  const groupData = {
+    name: groupName,
+    members: [currentUser]
+  };
+  localStorage.setItem("group_" + groupName, JSON.stringify(groupData));
+
+  const userGroups = JSON.parse(localStorage.getItem("groups_" + currentUser) || "[]");
+  userGroups.push(groupName);
+  localStorage.setItem("groups_" + currentUser, JSON.stringify(userGroups));
+
+  allGroups.push(groupName);
+  localStorage.setItem("all_groups", JSON.stringify(allGroups));
+
+  loadGroups();
+  alert("Grupo criado com sucesso!");
+  document.getElementById("newGroup").value = "";
+}
+
+// Entrar em grupo
+function joinGroup() {
+  const groupToJoin = document.getElementById("groupToJoin").value.trim();
+  if (!groupToJoin) {
+    alert("Preencha o campo do nome do grupo!");
+    return;
+  }
+
+  const allGroups = JSON.parse(localStorage.getItem("all_groups") || "[]");
+  if (!allGroups.includes(groupToJoin)) {
+    alert("Grupo inexistente!");
+    return;
+  }
+
+  const groupData = JSON.parse(localStorage.getItem("group_" + groupToJoin));
+  if (!groupData.members.includes(currentUser)) {
+    groupData.members.push(currentUser);
+    localStorage.setItem("group_" + groupToJoin, JSON.stringify(groupData));
+  }
+
+  const userGroups = JSON.parse(localStorage.getItem("groups_" + currentUser) || "[]");
+  if (!userGroups.includes(groupToJoin)) {
+    userGroups.push(groupToJoin);
+    localStorage.setItem("groups_" + currentUser, JSON.stringify(userGroups));
+  }
+
+  loadGroups();
+  openChatWith(groupToJoin); // Abre o chat após entrar
+  alert("Você entrou no grupo: " + groupToJoin);
+}
+
+// Carregar grupos
+function loadGroups() {
+  const list = document.getElementById("groupList");
+  list.innerHTML = "";
+  const userGroups = JSON.parse(localStorage.getItem("groups_" + currentUser) || "[]");
+  userGroups.forEach(group => {
+    const div = document.createElement("div");
+    div.className = "group";
+    div.textContent = group;
+    div.onclick = () => openChatWith(group);
+    list.appendChild(div);
+  });
+}
+
+// Gerar chave de chat
+function getChatKey(user1, user2) {
+  return "chat_" + [user1, user2].sort().join("_");
+}
+
+// Carregar tudo
+loadContacts();
+loadGroups();
+
+
+
+  </script>
+
+  
+  <aside id="asideParticipants">
+    
+  </aside>
+  
+</body>
+</html>
