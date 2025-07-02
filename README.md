@@ -3,7 +3,7 @@
 [![Live Demo](https://img.shields.io/badge/Demo-Live%20Site-brightgreen?style=for-the-badge)](https://icarox52.github.io/chat/)  
 [![GitHub stars](https://img.shields.io/github/stars/Icarox52/chat?style=for-the-badge)](https://github.com/Icarox52/chat/stargazers)  
 
-<a href="https://icarox52.github.io/chat/"><img src="https://via.placeholder.com/800x400/4a6fa5/ffffff?text=Chat+App+Preview"/></a>  
+<a href="https://icarox52.github.io/chat/"><img src="https://github.com/Icarox52/chat/blob/main/Captura%20de%20tela%202025-07-02%20114542.png"/></a>  
 
 ✨ **Bem-vindo ao Chat App!** Um projeto simples e elegante para bate-papo em tempo real com histórico de mensagens usando **Node.js** e armazenamento local.  
 
