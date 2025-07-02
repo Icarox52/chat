@@ -12,8 +12,7 @@
 ## 🚀 Recursos  
 
 - **Bate-papo em tempo real** ⚡  
-- **Histórico de mensagens persistente** 📜  
-- **Interface limpa e responsiva** 🎨📱💻  
+- **Histórico de mensagens persistente** 📜    
 - **Fácil de usar e configurar** 👍  
 
 ---
